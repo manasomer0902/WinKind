@@ -1,0 +1,97 @@
+/* ================= HOME PAGE ================= */
+
+/* Remove old spacing conflicts */
+.hero,
+.how,
+.cta-section {
+padding: 0;
+}
+
+/* ================= HOW IT WORKS ================= */
+
+.how {
+max-width: 1100px;
+margin: auto;
+text-align: center;
+}
+
+/* Heading */
+.how h2 {
+margin-bottom: 50px;
+color: var(--primary);
+}
+
+/* ================= STEPS GRID ================= */
+
+.steps {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 25px;
+}
+
+/* ================= STEP CARD ================= */
+
+.step {
+background: white;
+padding: 25px 20px;
+border-radius: 14px;
+text-align: center;
+transition: all 0.3s ease;
+box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+position: relative;
+}
+
+/* Hover effect */
+.step:hover {
+transform: translateY(-8px);
+box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+/* ================= ICON (NEW 🔥) ================= */
+
+.step::before {
+content: "⭐";
+position: absolute;
+top: -12px;
+left: 50%;
+transform: translateX(-50%);
+background: white;
+border-radius: 50%;
+padding: 5px 8px;
+font-size: 14px;
+}
+
+/* ================= TITLE ================= */
+
+.step h4 {
+margin-bottom: 10px;
+color: var(--primary);
+font-size: 16px;
+}
+
+/* ================= TEXT ================= */
+
+.step p {
+font-size: 14px;
+color: var(--text-light);
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* Tablet */
+@media (max-width: 900px) {
+.steps {
+grid-template-columns: repeat(2, 1fr);
+}
+}
+
+/* Mobile */
+@media (max-width: 500px) {
+.steps {
+grid-template-columns: 1fr;
+}
+
+.step {
+padding: 20px;
+}
+}

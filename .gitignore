@@ -1,0 +1,30 @@
+# ================= NODE =================
+node_modules/
+npm-debug.log
+
+# ================= ENV =================
+.env
+.env.local
+.env.*.local
+
+# ================= BUILD =================
+dist/
+build/
+
+# ================= OS =================
+.DS_Store
+Thumbs.db
+
+# ================= VITE =================
+client/dist/
+
+# ================= SERVER =================
+server/node_modules/
+client/node_modules/
+
+# ================= LOGS =================
+logs
+*.log
+
+# ================= UPLOADS (IMPORTANT) =================
+server/uploads/

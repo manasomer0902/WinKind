@@ -1,0 +1,61 @@
+/* ================= HIGHLIGHTS ================= */
+
+.highlights {
+text-align: center;
+}
+
+/* Heading */
+.highlights h2 {
+margin-bottom: 40px;
+}
+
+/* Grid layout */
+.highlight-grid {
+display: flex;
+justify-content: center;
+gap: 20px;
+flex-wrap: wrap;
+}
+
+/* Card */
+.highlight-card {
+background: white;
+padding: 25px;
+width: 250px;
+border-radius: 14px;
+box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+transition: 0.3s;
+}
+
+/* Hover */
+.highlight-card:hover {
+transform: translateY(-6px);
+}
+
+/* Title */
+.highlight-card h3 {
+color: #0a7f3f;
+margin-bottom: 10px;
+}
+
+/* Text */
+.highlight-card p {
+color: #555;
+font-size: 14px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* Tablet */
+@media (max-width: 768px) {
+.highlight-card {
+width: 200px;
+}
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+.highlight-card {
+width: 100%;
+}
+}

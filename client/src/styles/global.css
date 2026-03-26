@@ -1,0 +1,152 @@
+/* ================= RESET ================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  }
+
+/* ================= ROOT COLORS ================= */
+:root {
+--primary: #0a7f3f;
+--primary-light: #1db954;
+--bg-light: #f5f7fa;
+--bg-section: #f9fafb;
+--text-dark: #222;
+--text-light: #666;
+--white: #ffffff;
+}
+
+/* ================= BASE ================= */
+body {
+font-family: "Segoe UI", sans-serif;
+background: var(--bg-light);
+color: var(--text-dark);
+line-height: 1.6;
+}
+
+/* ================= LINKS ================= */
+a {
+text-decoration: none;
+color: inherit;
+}
+
+/* ================= BUTTON ================= */
+button {
+font-family: inherit;
+cursor: pointer;
+border: none;
+}
+
+/* ================= CONTAINER ================= */
+.container {
+max-width: 1200px;
+margin: auto;
+padding: 0 20px;
+}
+
+/* ================= SECTION ================= */
+.section {
+padding: 80px 20px;
+text-align: center;
+}
+
+/* Alternate background to remove “white gap feeling” */
+.section.alt {
+background: var(--bg-section);
+}
+
+/* ================= CARD ================= */
+.card {
+background: var(--white);
+border-radius: 14px;
+padding: 25px;
+box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+transition: all 0.3s ease;
+}
+
+.card:hover {
+transform: translateY(-6px);
+}
+
+/* ================= HEADINGS ================= */
+h1 {
+font-size: 42px;
+font-weight: 700;
+}
+
+h2 {
+font-size: 30px;
+font-weight: 600;
+margin-bottom: 20px;
+}
+
+h3 {
+font-size: 22px;
+color: var(--primary);
+}
+
+/* ================= TEXT ================= */
+p {
+color: var(--text-light);
+font-size: 15px;
+}
+
+/* ================= GREEN SECTION ================= */
+.section-green {
+background: linear-gradient(135deg, var(--primary), var(--primary-light));
+color: white;
+}
+
+.section-green h1,
+.section-green h2,
+.section-green p {
+color: white;
+}
+
+/* ================= BUTTON STYLE ================= */
+.btn-primary {
+padding: 12px 28px;
+background: var(--primary);
+color: white;
+border-radius: 8px;
+font-weight: 600;
+transition: 0.3s;
+}
+
+.btn-primary:hover {
+background: var(--primary-light);
+transform: scale(1.05);
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* Tablet */
+@media (max-width: 768px) {
+h1 {
+font-size: 32px;
+}
+
+h2 {
+font-size: 24px;
+}
+
+.section {
+padding: 60px 15px;
+}
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+h1 {
+font-size: 26px;
+}
+
+h2 {
+font-size: 20px;
+}
+
+.card {
+padding: 18px;
+}
+}

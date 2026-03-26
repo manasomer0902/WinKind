@@ -1,0 +1,72 @@
+/* Container */
+.auth-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0a7f3f, #1db954);
+}
+
+/* Box */
+.auth-box {
+  background: white;
+  padding: 40px;
+  width: 360px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Heading */
+.auth-box h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: #0a7f3f;
+}
+
+/* Inputs */
+.auth-box input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border 0.3s ease;
+}
+
+/* Input focus */
+.auth-box input:focus {
+  border-color: #0a7f3f;
+}
+
+/* Button */
+.auth-box button {
+  width: 100%;
+  padding: 12px;
+  background: #0a7f3f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Button hover */
+.auth-box button:hover {
+  background: #086b35;
+  transform: scale(1.02);
+}
+
+/* Bottom text */
+.auth-box p {
+  margin-top: 15px;
+  text-align: center;
+  cursor: pointer;
+  color: #555;
+}
+
+/* Hover effect on text */
+.auth-box p:hover {
+  color: #0a7f3f;
+}

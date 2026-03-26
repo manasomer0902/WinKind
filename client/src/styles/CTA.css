@@ -1,0 +1,79 @@
+/* ================= CTA SECTION ================= */
+.cta-section {
+  width: 100%;
+  text-align: center;
+  padding: 100px 20px;
+
+  /* 🔥 Premium gradient */
+  background: linear-gradient(135deg, #0a7f3f, #22c55e);
+
+  color: white;
+}
+
+/* ================= HEADING ================= */
+.cta-section h2 {
+  font-size: 36px;
+  margin-bottom: 15px;
+  font-weight: 700;
+  color: white;
+}
+
+/* ================= TEXT ================= */
+.cta-section p {
+  font-size: 18px;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+  color: #e6f5ec;
+  line-height: 1.6;
+}
+
+/* ================= BUTTON ================= */
+.cta-btn {
+  padding: 14px 35px;
+  font-size: 16px;
+  font-weight: 600;
+
+  background: white;
+  color: #0a7f3f;
+
+  border-radius: 10px;
+  border: none;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+.cta-btn:hover {
+  background: #f1f1f1;
+  transform: scale(1.05);
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .cta-section {
+    padding: 80px 15px;
+  }
+
+  .cta-section h2 {
+    font-size: 28px;
+  }
+
+  .cta-section p {
+    font-size: 16px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .cta-section h2 {
+    font-size: 24px;
+  }
+
+  .cta-btn {
+    width: 100%;
+  }
+}

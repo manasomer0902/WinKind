@@ -1,0 +1,97 @@
+/* ================= HERO ================= */
+
+.hero {
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  /* 🔥 Premium gradient background */
+  background: linear-gradient(135deg, #0a7f3f, #22c55e);
+
+  padding: 20px;
+}
+
+/* Content wrapper */
+.hero-content {
+  max-width: 700px;
+}
+
+/* ================= HEADING ================= */
+
+.hero h1 {
+  font-size: 52px;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+/* ================= TEXT ================= */
+
+.hero p {
+  font-size: 20px;
+  color: #e6f5ec;
+  margin-bottom: 35px;
+  line-height: 1.6;
+}
+
+/* ================= BUTTON ================= */
+
+.hero .cta-btn {
+  padding: 14px 35px;
+  background: white;
+  color: #0a7f3f;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 16px;
+
+  border: none;
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+.hero .cta-btn:hover {
+  background: #f1f1f1;
+  transform: scale(1.05);
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .hero {
+    min-height: 70vh;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .hero {
+    min-height: 60vh;
+    padding: 10px;
+  }
+
+  .hero h1 {
+    font-size: 26px;
+  }
+
+  .hero p {
+    font-size: 14px;
+  }
+
+  .hero .cta-btn {
+    width: 100%;
+  }
+}
