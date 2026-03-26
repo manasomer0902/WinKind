@@ -21,7 +21,14 @@ const app = express();
 /*
   ================= MIDDLEWARE =================
 */
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://win-kind.vercel.app/"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
 
 // Serve uploaded files
