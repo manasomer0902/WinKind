@@ -10,7 +10,7 @@ Public Charities Section
 const charities = [
   {
     name: "Smile Foundation",
-    desc: "Supports education for underprivileged children",
+    desc: "Supports education for underprivileged Children",
     img: smileImg,
   },
   {
