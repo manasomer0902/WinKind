@@ -21,6 +21,8 @@ import { protect } from "./middleware/authMiddleware.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 /*
   ================= MIDDLEWARE =================
 */
