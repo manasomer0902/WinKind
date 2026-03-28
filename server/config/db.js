@@ -26,7 +26,7 @@ const pool = new Pool({
   
   max: 10, // max connections
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000,
 });
 
 // ✅ Test DB connection on startup
