@@ -2,39 +2,34 @@ import pkg from "pg";
 const { Pool } = pkg;
 
 /*
-  Database Config (Production Ready)
-  ---------------------------------
-  - Works for both local & production
-  - SSL enabled in production
-  - Includes safety checks & connection test
+  FINAL STABLE DB CONFIG
 */
 
-const isProduction = process.env.NODE_ENV === "production";
-
-// ❌ Safety check
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not defined ❌");
 }
 
-// ✅ Create pool
+// 🔥 IMPORTANT FIX (SSL issue resolve)
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 
   ssl: {
-    rejectUnauthorized: false 
+    rejectUnauthorized: false,
   },
-  
-  max: 10, // max connections
+
+  max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });
 
-// ✅ Test DB connection on startup
+// ✅ Test DB connection
 pool.connect()
   .then(() => console.log("Database connected successfully ✅"))
   .catch((err) => {
-    console.error("Database connection error ❌", err.message);
-    process.exit(1); // stop server if DB fails
+    console.error("Database connection error ❌", err);
+    process.exit(1);
   });
 
 export default pool;
