@@ -8,41 +8,40 @@ import {
 
 import { protect } from "../middleware/authMiddleware.js";
 import { adminOnly } from "../middleware/adminMiddleware.js";
-import  upload  from "../middleware/uploadMiddleware.js";
+import upload from "../middleware/uploadMiddleware.js";
 import { requireSubscription } from "../middleware/subscriptionMiddleware.js";
 
 /*
   Winner Routes
   -------------
+  Base: /api/winner
+
   Handles:
   - User proof upload
   - Admin verification
-  - Admin fetching winners
-
-  Rules:
-  - Upload → authenticated user
-  - Verify → admin only
-  - Fetch winners → admin only
+  - Fetch winners
 */
 
 const router = express.Router();
 
 // ================= USER =================
 
-// Upload winning proof (image)
+// Upload proof
 router.post(
-  "/upload/:id",
+  "/:id/proof",
   protect,
   requireSubscription,
+  upload.single("proof"),
   uploadProof
 );
 
-router.get("/my", protect, getUserWinnings);
+// Get user's winnings
+router.get("/me", protect, getUserWinnings);
 
 // ================= ADMIN =================
 
 // Verify winner (approve/reject)
-router.put("/verify", protect, adminOnly, verifyWinner);
+router.put("/:id", protect, adminOnly, verifyWinner);
 
 // Get all winners
 router.get("/", protect, adminOnly, getAllWinners);

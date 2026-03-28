@@ -1,43 +1,52 @@
 import "../styles/How.css";
 
+const steps = [
+  {
+    id: 1,
+    icon: "💳",
+    title: "Subscribe",
+    desc: "Choose a monthly or yearly plan to participate.",
+  },
+  {
+    id: 2,
+    icon: "🎯",
+    title: "Enter Scores",
+    desc: "Submit your 5 numbers (1–45).",
+  },
+  {
+    id: 3,
+    icon: "🎲",
+    title: "Monthly Draw",
+    desc: "System generates 5 random numbers.",
+  },
+  {
+    id: 4,
+    icon: "🏆",
+    title: "Win Rewards",
+    desc: "Match 3 or more numbers to win prizes.",
+  },
+];
+
 const HowItWorks = () => {
-return ( <section className="how container"> <h2>How It Works</h2>
+  return (
+    <section className="how container">
+      <h2>How It Works</h2>
 
+      <div className="steps">
+        {steps.map((step) => (
+          <div key={step.id} className="step">
 
-  <div className="steps">
+            <div className="icon">{step.icon}</div>
 
-    <div className="step">
-      <div className="icon">💳</div>
-      <h4>Subscribe</h4>
-      <p>Choose a monthly or yearly plan to participate.</p>
-    </div>
+            <h4>{step.title}</h4>
 
+            <p>{step.desc}</p>
 
-    <div className="step">
-      <div className="icon">🎯</div>
-      <h4>Enter Scores</h4>
-      <p>Submit your 5 numbers (1–45).</p>
-    </div>
-
-
-    <div className="step">
-      <div className="icon">🎲</div>
-      <h4>Monthly Draw</h4>
-      <p>System generates 5 random numbers.</p>
-    </div>
-
-
-    <div className="step">
-      <div className="icon">🏆</div>
-      <h4>Win Rewards</h4>
-      <p>Match 3+ numbers to win prizes.</p>
-    </div>
-
-  </div>
-</section>
-
-
-);
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 };
 
 export default HowItWorks;

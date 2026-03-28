@@ -1,40 +1,38 @@
+const BASE = import.meta.env.VITE_API_URL + "/api";
+const API = BASE + "/winner";
+
 /*
-  Winner Service
-  --------------
-  Handles:
-  - Fetching all winners (admin)
-  - Verifying winners (approve/reject)
-
-  Used in Admin Panel
+  Get my winnings
 */
-
-const API = import.meta.env.VITE_API_URL + "/winner";
-
 export const getMyWinnings = async () => {
-  const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-  const res = await fetch(`${API}/my`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+    const res = await fetch(`${API}/me`, {   
+      headers: token
+        ? { Authorization: `Bearer ${token}` }
+        : {},
+    });
 
-  return await res.json();
+    return await res.json();
+
+  } catch (error) {
+    console.error("getMyWinnings error:", error);
+    return [];
+  }
 };
 
 /*
-  Get all winners
-  - Admin only
-  - Returns list of winners for verification
+  Get all winners (admin)
 */
 export const getAllWinners = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const res = await fetch(`${API}`, {   
+      headers: token
+        ? { Authorization: `Bearer ${token}` }
+        : {},
     });
 
     if (!res.ok) {
@@ -42,57 +40,58 @@ export const getAllWinners = async () => {
     }
 
     return await res.json();
+
   } catch (error) {
     console.error("getAllWinners error:", error);
-    return []; // prevent UI crash
+    return [];
   }
 };
 
 /*
-  Verify winner (approve/reject)
-  - Admin action
-  - Updates winner status
+  Verify winner (admin)
 */
-export const verifyWinner = async (data) => {
+export const verifyWinner = async (id, status) => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API}/verify`, {
+    const res = await fetch(`${API}/${id}`, {   
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,       
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ status }),         
     });
 
-    if (!res.ok) {
-      throw new Error("Failed to verify winner");
-    }
-
     return await res.json();
+
   } catch (error) {
     console.error("verifyWinner error:", error);
-    return null;
   }
 };
 
+/*
+  Upload proof
+*/
 export const uploadProof = async (id, file) => {
-  const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-  const formData = new FormData();
-  formData.append("proof", file);
+    const formData = new FormData();
+    formData.append("proof", file);
 
-  const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/winner/upload/${id}`,
-    {
+    const res = await fetch(`${API}/${id}/proof`, {  
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,            
       },
       body: formData,
-    }
-  );
+    });
 
-  return await res.json();
+    return await res.json();
+
+  } catch (error) {
+    console.error("uploadProof error:", error);
+    return null;
+  }
 };

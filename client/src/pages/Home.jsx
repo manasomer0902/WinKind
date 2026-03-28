@@ -7,41 +7,35 @@ import Highlights from "../components/Highlights";
 import "../styles/Home.css";
 
 const Home = () => {
-return (
-<>
-  {/* HERO */} 
-  <div className="section section-green"> 
-    <Hero /> 
-  </div>
+  return (
+    <main className="home">
 
-  {/* WHY WIN KIND (LIGHT BG) */}
-  <div className="section alt">
-    <Highlights />
-  </div>
+      <section className="section section-green">
+        <Hero />
+      </section>
 
-  {/* HOW IT WORKS */}
-  <div className="section">
-    <HowItWorks />
-  </div>
+      <section className="section alt">
+        <Highlights />
+      </section>
 
-  {/* SUBSCRIPTION */}
-  <div className="section alt">
-    <SubscriptionInfo />
-  </div>
+      <section className="section">
+        <HowItWorks />
+      </section>
 
-  {/* CHARITIES */}
-  <div className="section">
-    <Charities />
-  </div>
+      <section className="section alt">
+        <SubscriptionInfo />
+      </section>
 
-  {/* FINAL CTA (GREEN) */}
-  <div className="section section-green">
-    <CTA />
-  </div>
-</>
+      <section className="section">
+        <Charities />
+      </section>
 
+      <section className="section section-green">
+        <CTA />
+      </section>
 
-);
+    </main>
+  );
 };
 
 export default Home;

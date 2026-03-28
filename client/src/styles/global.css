@@ -1,152 +1,201 @@
 /* ================= RESET ================= */
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  }
+}
 
 /* ================= ROOT COLORS ================= */
 :root {
---primary: #0a7f3f;
---primary-light: #1db954;
---bg-light: #f5f7fa;
---bg-section: #f9fafb;
---text-dark: #222;
---text-light: #666;
---white: #ffffff;
+  --primary: #0a7f3f;
+  --primary-light: #1db954;
+
+  --bg-light: #f5f7fa;
+  --bg-section: #f9fafb;
+
+  --text-dark: #222;
+  --text-light: #666;
+
+  --white: #ffffff;
+
+  /* NEW */
+  --radius: 12px;
+  --transition: all 0.3s ease;
 }
 
 /* ================= BASE ================= */
 body {
-font-family: "Segoe UI", sans-serif;
-background: var(--bg-light);
-color: var(--text-dark);
-line-height: 1.6;
+  font-family: "Segoe UI", sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  line-height: 1.6;
+
+  /* smooth feel */
+  scroll-behavior: smooth;
 }
 
 /* ================= LINKS ================= */
 a {
-text-decoration: none;
-color: inherit;
+  text-decoration: none;
+  color: inherit;
 }
 
 /* ================= BUTTON ================= */
 button {
-font-family: inherit;
-cursor: pointer;
-border: none;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
 }
 
 /* ================= CONTAINER ================= */
 .container {
-max-width: 1200px;
-margin: auto;
-padding: 0 20px;
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 20px;
 }
 
 /* ================= SECTION ================= */
 .section {
-padding: 80px 20px;
-text-align: center;
+  padding: 90px 20px;
+  text-align: center;
 }
 
-/* Alternate background to remove “white gap feeling” */
 .section.alt {
-background: var(--bg-section);
+  background: var(--bg-section);
 }
 
 /* ================= CARD ================= */
 .card {
-background: var(--white);
-border-radius: 14px;
-padding: 25px;
-box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-transition: all 0.3s ease;
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 25px;
+
+  /* improved shadow */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+  transition: var(--transition);
 }
 
 .card:hover {
-transform: translateY(-6px);
+  transform: translateY(-8px);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.12);
 }
 
 /* ================= HEADINGS ================= */
 h1 {
-font-size: 42px;
-font-weight: 700;
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
 h2 {
-font-size: 30px;
-font-weight: 600;
-margin-bottom: 20px;
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 25px;
 }
 
 h3 {
-font-size: 22px;
-color: var(--primary);
+  font-size: 22px;
+  color: var(--primary);
+  margin-bottom: 8px;
 }
 
 /* ================= TEXT ================= */
 p {
-color: var(--text-light);
-font-size: 15px;
+  color: var(--text-light);
+  font-size: 15px;
 }
 
 /* ================= GREEN SECTION ================= */
 .section-green {
-background: linear-gradient(135deg, var(--primary), var(--primary-light));
-color: white;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
 }
 
 .section-green h1,
 .section-green h2,
 .section-green p {
-color: white;
+  color: white;
 }
 
-/* ================= BUTTON STYLE ================= */
+/* ================= BUTTON SYSTEM ================= */
+
+/* PRIMARY BUTTON */
 .btn-primary {
-padding: 12px 28px;
-background: var(--primary);
-color: white;
-border-radius: 8px;
-font-weight: 600;
-transition: 0.3s;
+  padding: 12px 28px;
+  background: var(--primary);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: var(--transition);
 }
 
 .btn-primary:hover {
-background: var(--primary-light);
-transform: scale(1.05);
+  background: var(--primary-light);
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* SECONDARY BUTTON */
+.btn-outline {
+  padding: 10px 24px;
+  border: 2px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-outline:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* ================= UTILITY ================= */
+.text-center {
+  text-align: center;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mt-40 {
+  margin-top: 40px;
 }
 
 /* ================= RESPONSIVE ================= */
 
 /* Tablet */
 @media (max-width: 768px) {
-h1 {
-font-size: 32px;
-}
+  h1 {
+    font-size: 32px;
+  }
 
-h2 {
-font-size: 24px;
-}
+  h2 {
+    font-size: 24px;
+  }
 
-.section {
-padding: 60px 15px;
-}
+  .section {
+    padding: 70px 15px;
+  }
 }
 
 /* Mobile */
 @media (max-width: 480px) {
-h1 {
-font-size: 26px;
-}
+  h1 {
+    font-size: 26px;
+  }
 
-h2 {
-font-size: 20px;
-}
+  h2 {
+    font-size: 20px;
+  }
 
-.card {
-padding: 18px;
-}
+  .card {
+    padding: 18px;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
 }

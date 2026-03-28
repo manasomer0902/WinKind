@@ -1,18 +1,14 @@
 import pool from "../config/db.js";
 
 /*
-  Admin Controller
-  ----------------
-  Handles:
-  - Fetching users
-  - Updating user roles
+  Admin Controller (Production Ready)
 */
 
 // ================= GET ALL USERS =================
 export const getAllUsers = async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, name, email, role FROM users"
+      "SELECT id, name, email, role FROM users ORDER BY id DESC LIMIT 50"
     );
 
     res.json(result.rows);
@@ -29,18 +25,23 @@ export const getAllUsers = async (req, res) => {
 // ================= UPDATE USER ROLE =================
 export const updateUserRole = async (req, res) => {
   try {
-    const { user_id, role } = req.body;
+    const user_id = req.params.id;   
+    const { role } = req.body;
 
-    // 🔴 Validate role
+    if (!user_id || !role) {
+      return res.status(400).json({
+        message: "User ID and role required",
+      });
+    }
+
     if (!["user", "admin"].includes(role)) {
       return res.status(400).json({
         message: "Invalid role",
       });
     }
 
-    // 🔴 Check if user exists
     const userCheck = await pool.query(
-      "SELECT * FROM users WHERE id = $1",
+      "SELECT id, role FROM users WHERE id = $1",
       [user_id]
     );
 
@@ -50,20 +51,31 @@ export const updateUserRole = async (req, res) => {
       });
     }
 
-    // 🟡 Optional: prevent admin removing own access
-    if (req.user.id === user_id && role !== "admin") {
+    // 🔒 Prevent self demotion
+    if (req.user.id === user_id && role !== "admin") {   
       return res.status(400).json({
         message: "You cannot remove your own admin access",
       });
     }
 
-    // 🟢 Update role
-    await pool.query(
-      "UPDATE users SET role = $1 WHERE id = $2",
+    const updated = await pool.query(
+      `UPDATE users 
+       SET role = $1 
+       WHERE id = $2 
+       RETURNING id, name, email, role`,
       [role, user_id]
     );
 
-    res.json({ message: "Role updated successfully" });
+    if (!updated.rows[0]) {
+      return res.status(500).json({
+        message: "Update failed",
+      });
+    }
+
+    res.json({
+      message: "Role updated successfully",
+      user: updated.rows[0],
+    });
 
   } catch (error) {
     console.error("updateUserRole error:", error.message);
@@ -74,20 +86,32 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
+// ================= ADMIN STATS =================
 export const getAdminStats = async (req, res) => {
   try {
     const users = await pool.query(
       "SELECT COUNT(*) FROM users WHERE role = 'user'"
     );
-    const winners = await pool.query("SELECT COUNT(*) FROM winners");
-    const subs = await pool.query("SELECT COUNT(*) FROM subscriptions");
+
+    const winners = await pool.query(
+      "SELECT COUNT(*) FROM winners"
+    );
+
+    const subs = await pool.query(
+      "SELECT COUNT(*) FROM subscriptions"
+    );
 
     res.json({
-      totalUsers: users.rows[0].count,
-      totalWinners: winners.rows[0].count,
-      totalSubscriptions: subs.rows[0].count,
+      totalUsers: Number(users.rows[0].count),
+      totalWinners: Number(winners.rows[0].count),
+      totalSubscriptions: Number(subs.rows[0].count),
     });
+
   } catch (error) {
-    res.status(500).json({ message: "Stats error" });
+    console.error("getAdminStats error:", error.message);
+
+    res.status(500).json({
+      message: "Stats error",
+    });
   }
 };

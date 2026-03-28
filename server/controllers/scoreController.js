@@ -2,52 +2,49 @@ import pool from "../config/db.js";
 
 /*
   Score Controller
-  ----------------
-  Handles:
-  - Adding scores (max 5, FIFO logic)
-  - Fetching scores (latest first)
 */
 
 // ================= ADD SCORE =================
 export const addScore = async (req, res) => {
   try {
-    // 🔴 Safety check
-    if (!req.user) {
-      return res.status(401).json({
-        message: "Not authorized",
-      });
-    }
-
     const userId = req.user.id;
-    const { score, date } = req.body;
+    let { score, date } = req.body;
 
-    // 🔴 Validation
-    if (!score || isNaN(score)) {
+    // 🔴 Validate score
+    if (!Number.isInteger(score) || score < 1 || score > 45) {   
       return res.status(400).json({
-        message: "Valid score is required",
+        message: "Score must be between 1 and 45",
       });
     }
 
-    // 🟡 Get existing scores (oldest first)
+    // 🟡 Validate date
+    date = date ? new Date(date) : new Date();
+    if (isNaN(date.getTime())) {
+      return res.status(400).json({
+        message: "Invalid date",
+      });
+    }
+
+    // 🟡 Get existing scores (FIFO)
     const existingScores = await pool.query(
       "SELECT id FROM scores WHERE user_id = $1 ORDER BY created_at ASC",
       [userId]
     );
 
-    // 🔴 If already 5 → remove oldest (FIFO)
+    // 🔴 Remove oldest if >=5
     if (existingScores.rows.length >= 5) {
-      const oldestScore = existingScores.rows[0];
-
       await pool.query(
         "DELETE FROM scores WHERE id = $1",
-        [oldestScore.id]
+        [existingScores.rows[0].id]
       );
     }
 
-    // 🟢 Insert new score
+    // 🟢 Insert new
     const newScore = await pool.query(
-      "INSERT INTO scores (user_id, score, date) VALUES ($1, $2, $3) RETURNING id, score, date, created_at",
-      [userId, score, date || new Date()]
+      `INSERT INTO scores (user_id, score, date) 
+       VALUES ($1, $2, $3) 
+       RETURNING id, score, date, created_at`,
+      [userId, score, date]
     );
 
     res.status(201).json({
@@ -57,26 +54,15 @@ export const addScore = async (req, res) => {
 
   } catch (error) {
     console.error("addScore error:", error.message);
-
-    res.status(500).json({
-      message: "Server error while adding score",
-    });
+    res.status(500).json({ message: "Server error while adding score" });
   }
 };
 
 // ================= GET SCORES =================
 export const getScores = async (req, res) => {
   try {
-    // 🔴 Safety check
-    if (!req.user) {
-      return res.status(401).json({
-        message: "Not authorized",
-      });
-    }
-
     const userId = req.user.id;
 
-    // 🟢 Fetch scores (latest first)
     const scores = await pool.query(
       "SELECT id, score, date, created_at FROM scores WHERE user_id = $1 ORDER BY created_at DESC",
       [userId]
@@ -93,16 +79,29 @@ export const getScores = async (req, res) => {
   }
 };
 
-// ================= UPDATES SCORES =================
+// ================= UPDATE SCORE =================
 export const updateScore = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { score, date } = req.body;
-    const scoreId = req.params.id;
+    const scoreId = req.params.id;   
+    let { score, date } = req.body;
 
-    // 🔒 Check if draw already completed
+    if (!Number.isInteger(score) || score < 1 || score > 45) {  
+      return res.status(400).json({
+        message: "Score must be between 1 and 45",
+      });
+    }
+
+    date = date ? new Date(date) : new Date();   
+    if (isNaN(date.getTime())) {
+      return res.status(400).json({
+        message: "Invalid date",
+      });
+    }
+
+    // 🔒 Draw lock
     const draw = await pool.query(
-      "SELECT * FROM draws WHERE status = 'completed' ORDER BY draw_date DESC LIMIT 1"
+      "SELECT 1 FROM draws WHERE status = 'completed' LIMIT 1"
     );
 
     if (draw.rows.length > 0) {
@@ -119,6 +118,12 @@ export const updateScore = async (req, res) => {
       [score, date, scoreId, userId]
     );
 
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Score not found",
+      });
+    }
+
     res.json(result.rows[0]);
 
   } catch (err) {
@@ -127,15 +132,15 @@ export const updateScore = async (req, res) => {
   }
 };
 
-// ================= DELETE SCORES =================
+// ================= DELETE SCORE =================
 export const deleteScore = async (req, res) => {
   try {
     const userId = req.user.id;
-    const scoreId = req.params.id;
+    const scoreId = req.params.id;  
 
-    // 🔒 Check draw lock
+    // 🔒 Draw lock
     const draw = await pool.query(
-      "SELECT * FROM draws WHERE status = 'completed' ORDER BY draw_date DESC LIMIT 1"
+      "SELECT 1 FROM draws WHERE status = 'completed' LIMIT 1"
     );
 
     if (draw.rows.length > 0) {
@@ -144,12 +149,18 @@ export const deleteScore = async (req, res) => {
       });
     }
 
-    await pool.query(
-      "DELETE FROM scores WHERE id = $1 AND user_id = $2",
+    const result = await pool.query(
+      "DELETE FROM scores WHERE id = $1 AND user_id = $2 RETURNING id",
       [scoreId, userId]
     );
 
-    res.json({ message: "Score deleted" });
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Score not found",
+      });
+    }
+
+    res.json({ message: "Score deleted successfully" });
 
   } catch (err) {
     console.error("deleteScore error:", err.message);

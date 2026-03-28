@@ -1,12 +1,17 @@
 import jwt from "jsonwebtoken";
 
 /*
-  Auth Middleware (Protect)
-  ------------------------
-  - Verifies JWT token
-  - Attaches user to request
-  - Blocks unauthorized access
+  Auth Middleware (Production Ready)
+  ---------------------------------
+  - Verifies JWT
+  - Handles expiry
+  - Safe error messages
 */
+
+// ❌ Safety check
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is missing ❌");
+}
 
 export const protect = (req, res, next) => {
   try {
@@ -14,15 +19,18 @@ export const protect = (req, res, next) => {
 
     // 🔴 No header
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token, authorization denied" });
+      return res.status(401).json({
+        message: "No token, authorization denied",
+      });
     }
 
     // 🟡 Extract token
     const token = authHeader.split(" ")[1];
 
-    // 🔴 Invalid token (null / undefined)
     if (!token || token === "null") {
-      return res.status(401).json({ message: "Invalid token" });
+      return res.status(401).json({
+        message: "Invalid token",
+      });
     }
 
     // 🟢 Verify token
@@ -35,6 +43,13 @@ export const protect = (req, res, next) => {
 
   } catch (error) {
     console.error("Auth Middleware Error:", error.message);
+
+    // 🔥 Handle expired token separately
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        message: "Session expired, please login again",
+      });
+    }
 
     return res.status(401).json({
       message: "Not authorized, token failed",

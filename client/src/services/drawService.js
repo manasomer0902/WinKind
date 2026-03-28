@@ -1,28 +1,13 @@
-/*
-  Draw Service
-  ------------
-  Handles all API calls related to:
-  - Latest draw
-  - Winners
-  - Admin draw execution
-
-  Uses environment variable for API base URL
-*/
-
-const API = import.meta.env.VITE_API_URL + "/draw";
+const BASE = import.meta.env.VITE_API_URL + "/api";
+const API = BASE + "/draw";
+const WINNER_API = BASE + "/winner";
 
 /*
   Get latest draw result
-  - Public endpoint (no token required)
 */
 export const getLatestDraw = async () => {
   try {
-    const token = localStorage.getItem("token");
-
-    const res = await fetch(`${API}/latest`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const res = await fetch(`${API}/latest`, {  
       cache: "no-store",
     });
 
@@ -39,26 +24,23 @@ export const getLatestDraw = async () => {
 
 /*
   Get winners list
-  - Requires authentication
 */
 export const getWinners = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/winner`, 
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await fetch(`${WINNER_API}`, {   
+      headers: token
+        ? { Authorization: `Bearer ${token}` }   
+        : {},
+    });
 
     if (!res.ok) {
       throw new Error("Failed to fetch winners");
     }
 
     return await res.json();
+
   } catch (error) {
     console.error("getWinners error:", error);
     return [];
@@ -67,27 +49,52 @@ export const getWinners = async () => {
 
 /*
   Run draw (Admin only)
-  - Protected route
-  - Generates numbers + calculates winners
 */
 export const runDraw = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API}/run`, {
+    const res = await fetch(`${API}`, {   
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`, 
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to run draw");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("runDraw error:", error);
+    return null;
+  }
+};
+
+/*
+  Simulate draw (Admin only)
+*/
+export const simulateDraw = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${API}/simulate`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
     if (!res.ok) {
-      throw new Error("Failed to run draw");
+      throw new Error("Failed to simulate draw");
     }
 
     return await res.json();
+
   } catch (error) {
-    console.error("runDraw error:", error);
+    console.error("simulateDraw error:", error);
     return null;
   }
 };

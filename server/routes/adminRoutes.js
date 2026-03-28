@@ -11,24 +11,24 @@ import { adminOnly } from "../middleware/adminMiddleware.js";
 /*
   Admin Routes
   ------------
-  Handles:
-  - User management
-  - Role updates
+  Base: /api/admin
 
-  All routes are:
-  - Protected (JWT required)
+  All routes:
+  - Protected
   - Admin only
 */
 
 const router = express.Router();
 
-// ================= USER MANAGEMENT =================
+// ================= USERS =================
 
 // Get all users
 router.get("/users", protect, adminOnly, getAllUsers);
 
-// Update user role (user ↔ admin)
-router.put("/role", protect, adminOnly, updateUserRole);
+// Update user role
+router.put("/users/:id/", protect, adminOnly, updateUserRole);
+
+// ================= STATS =================
 
 router.get("/stats", protect, adminOnly, getAdminStats);
 

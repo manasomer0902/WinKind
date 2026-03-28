@@ -1,28 +1,17 @@
-/*
-  Admin Service
-  -------------
-  Handles:
-  - Fetching all users
-  - Updating user roles
-
-  Used in Admin Panel
-*/
-
-const API = import.meta.env.VITE_API_URL + "/admin";
+const BASE = import.meta.env.VITE_API_URL + "/api";
+const API = BASE + "/admin";
 
 /*
   Get all users
-  - Admin only
-  - Returns list of users for management
 */
 export const getAllUsers = async () => {
   try {
     const token = localStorage.getItem("token");
 
     const res = await fetch(`${API}/users`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: token
+        ? { Authorization: `Bearer ${token}` }
+        : {},
     });
 
     if (!res.ok) {
@@ -30,58 +19,58 @@ export const getAllUsers = async () => {
     }
 
     const data = await res.json();
-
-    // Ensure array safety
     return Array.isArray(data) ? data : [];
 
   } catch (error) {
     console.error("getAllUsers error:", error);
-    return []; // prevent UI crash
+    return [];
   }
 };
 
 /*
   Update user role
-  - Admin action
-  - Promotes/demotes user
 */
-export const updateUserRole = async (data) => {
+export const updateUserRole = async (id, role) => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API}/role`, {
+      const res = await fetch(`${API}/users/${id}/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ role }),
     });
 
+    const data = await res.json();
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || "Failed to update role");
+      throw new Error (data.message || "Failed to update role");
     }
-
-    return await res.json();
-
+    return data;
   } catch (error) {
     console.error("updateUserRole error:", error);
-    alert(error.message);
     return null;
   }
 };
 
-
+/*
+  Get admin stats
+*/
 export const getAdminStats = async () => {
-  const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-  const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/admin/stats`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
+    const res = await fetch(`${API}/stats`, {
+      headers: token
+        ? { Authorization: `Bearer ${token}` }
+        : {},
+    });
 
-  return res.json();
+    return await res.json();
+
+  } catch (error) {
+    console.error("getAdminStats error:", error);
+    return null;
+  }
 };

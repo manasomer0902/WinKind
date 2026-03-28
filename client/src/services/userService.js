@@ -1,27 +1,17 @@
-/*
-  User Service
-  ------------
-  Handles:
-  - Fetching logged-in user profile
-
-  Used in Dashboard
-*/
-
-const API = import.meta.env.VITE_API_URL + "/user";
+const BASE = import.meta.env.VITE_API_URL + "/api";
+const API = BASE + "/user";
 
 /*
   Get user profile
-  - Requires authentication
-  - Returns user details (name, email, role, etc.)
 */
 export const getProfile = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API}/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const res = await fetch(`${API}/me`, {   
+      headers: token
+        ? { Authorization: `Bearer ${token}` }
+        : {},
     });
 
     if (!res.ok) {
@@ -32,31 +22,32 @@ export const getProfile = async () => {
 
   } catch (error) {
     console.error("getProfile error:", error);
-    return null; // prevent UI crash
+    return null;
   }
 };
 
+/*
+  Update user profile
+*/
 export const updateProfile = async (data) => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/user/profile`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const res = await fetch(`${API}/me`, {   
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,  
+      },
+      body: JSON.stringify(data),
+    });
 
     if (!res.ok) {
       throw new Error("Failed to update profile");
     }
 
     return await res.json();
+
   } catch (error) {
     console.error("updateProfile error:", error);
     return null;

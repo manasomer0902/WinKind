@@ -15,10 +15,21 @@ export const addCharity = async (req, res) => {
   try {
     const { name, description, image_url } = req.body;
 
-    // 🔴 Validation
     if (!name || !description) {
       return res.status(400).json({
         message: "Name and description are required",
+      });
+    }
+
+    // 🔴 Prevent duplicate
+    const existing = await pool.query(
+      "SELECT id FROM charities WHERE LOWER(name) = LOWER($1)",
+      [name]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.status(400).json({
+        message: "Charity already exists",
       });
     }
 
@@ -66,28 +77,22 @@ export const getCharities = async (req, res) => {
 // ================= SELECT CHARITY =================
 export const selectCharity = async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
-
     const userId = req.user.id;
-    const { charity_id, contribution_percentage } = req.body;
+    let { charity_id, contribution_percentage } = req.body;
 
-    // 🔴 Validation
     if (!charity_id || !contribution_percentage) {
       return res.status(400).json({
         message: "Charity and contribution % required",
       });
     }
 
-    // 🔴 Min 10% rule (PRD)
-    if (contribution_percentage < 10) {
+    // 🔴 Range validation
+    if (contribution_percentage < 10 || contribution_percentage > 100) {
       return res.status(400).json({
-        message: "Minimum contribution is 10%",
+        message: "Contribution must be between 10% and 100%",
       });
     }
 
-    // 🔴 Check charity exists
     const charityCheck = await pool.query(
       "SELECT id FROM charities WHERE id = $1",
       [charity_id]
@@ -99,16 +104,17 @@ export const selectCharity = async (req, res) => {
       });
     }
 
-    // 🟢 Update user preference
-    await pool.query(
+    const result = await pool.query(
       `UPDATE users 
        SET charity_id = $1, contribution_percentage = $2 
-       WHERE id = $3`,
+       WHERE id = $3
+       RETURNING charity_id, contribution_percentage`,
       [charity_id, contribution_percentage, userId]
     );
 
     res.json({
       message: "Charity selected successfully",
+      data: result.rows[0],
     });
 
   } catch (error) {
@@ -158,7 +164,17 @@ export const deleteCharity = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // remove reference first (safe)
+    const check = await pool.query(
+      "SELECT id FROM charities WHERE id = $1",
+      [id]
+    );
+
+    if (check.rows.length === 0) {
+      return res.status(404).json({
+        message: "Charity not found",
+      });
+    }
+
     await pool.query(
       "UPDATE users SET charity_id = NULL WHERE charity_id = $1",
       [id]

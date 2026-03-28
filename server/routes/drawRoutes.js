@@ -12,28 +12,26 @@ import { requireSubscription } from "../middleware/subscriptionMiddleware.js";
 /*
   Draw Routes
   -----------
-  Handles:
-  - Running actual draw (DB save)
-  - Simulating draw (no DB save)
-  - Fetching latest draw
+  Base: /api/draw
 
   Rules:
-  - Admin routes → protected + adminOnly
-  - User routes → protected
+  - Admin → run & simulate
+  - Users → view results (subscription required)
 */
 
 const router = express.Router();
 
 // ================= ADMIN =================
 
-// Run actual draw (saved in DB)
-router.post("/run", protect, adminOnly, runDraw);
+// Run actual draw
+router.post("/", protect, adminOnly, runDraw);
 
 // Simulate draw (no DB save)
-router.post("/simulate", protect, adminOnly, simulateDraw);
+router.get("/simulate", protect, adminOnly, simulateDraw);
 
+// ================= USER =================
 
-// Get latest draw results
-router.get("/latest", protect, requireSubscription, getLatestDraw);
+// Get latest draw
+router.get("/latest", getLatestDraw);
 
 export default router;

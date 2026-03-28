@@ -1,38 +1,20 @@
 import { useEffect, useState } from "react";
 import "../styles/Dashboard.css";
+
 import { getProfile, updateProfile } from "../services/userService";
 import { addScore, getScores, updateScore, deleteScore } from "../services/scoreService";
-import { getCharities, selectCharity } from "../services/charityService";
-import { createSubscription, getSubscription, createOrder, verifyPayment } from "../services/subscriptionService";
+import { getCharities, selectCharity, getUserCharity } from "../services/charityService";
+import { getSubscription, createOrder, verifyPayment } from "../services/subscriptionService";
 import { getLatestDraw, getWinners } from "../services/drawService";
+
 import DrawResult from "../components/DrawResult";
 import Winnings from "../components/Winnings";
 
-/*
-  Dashboard Component
-  ------------------
-  This is the main user panel.
-
-  Responsibilities:
-  - Show user info
-  - Handle subscription
-  - Manage scores (max 5 logic handled backend)
-  - Charity selection
-  - Show draw + winnings
-
-  NOTE:
-  - UI is role-based (admin vs user)
-*/
-
 const Dashboard = () => {
 
-  // ================= STATE =================
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const [editData, setEditData] = useState({
-    name: "",
-    email: ""
-  });
+  const [editData, setEditData] = useState({ name: "", email: "" });
 
   const [editingScore, setEditingScore] = useState(null);
   const [scores, setScores] = useState([]);
@@ -48,80 +30,61 @@ const Dashboard = () => {
   const [winners, setWinners] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [loadingPlan, setLoadingPlan] = useState(true);
-
+  const [loadingPlan, setLoadingPlan] = useState(null);
 
   const role = localStorage.getItem("role");
 
-  // ================= FETCH DATA =================
   useEffect(() => {
     fetchData();
-
-    const interval = setInterval(() => {
-      fetchData();
-    }, 5000);
-
-    return () => clearInterval(interval);
   }, [editMode]);
 
   const fetchData = async () => {
-  try {
-    const userData = await getProfile();
-    const scoreData = await getScores();
-    const charityData = await getCharities();
+    try {
+      const userData = await getProfile();
+      const scoreData = await getScores();
+      const charityData = await getCharities();
+      const userCharity = await getUserCharity();
+      const sub = await getSubscription();
 
-    const userCharityRes = await fetch(
-      `${import.meta.env.VITE_API_URL}/charity/my`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      setSubscription(sub);
+
+      let latest = null;
+      let winnerData = [];
+
+      if (sub && sub.status === "active") {
+        latest = await getLatestDraw();
+
+        if (role === "admin") {
+          winnerData = await getWinners();
+        }
       }
-    );
 
-    const userCharity = await userCharityRes.json();
+      setUser(userData);
 
-    const sub = await getSubscription();
-    setSubscription(sub);
-    if (!sub || sub.status !== "active") {
-      setDraw(null);
-      setWinners();
-      return;
+      if (!editMode) {
+        setEditData({
+          name: userData?.name || "",
+          email: userData?.email || "",
+        });
+      }
+
+      setScores(Array.isArray(scoreData) ? scoreData : []);
+      setCharities(Array.isArray(charityData) ? charityData : []);
+      setSelected(userCharity?.charity_id || "");
+      setPercentage(userCharity?.contribution_percentage || 10);
+
+      setDraw(latest);
+      setWinners(Array.isArray(winnerData) ? winnerData : []);
+
+    } catch (error) {
+      console.error("Dashboard error:", error);
+    } finally {
+      setLoading(false);
     }
-    
-    const latest = await getLatestDraw();
-
-    let winnerData = [];
-
-    // 🔥 ONLY ADMIN CAN FETCH WINNERS
-    if (role === "admin") {
-      winnerData = await getWinners();
-    }
-
-    setUser(userData);
-    if (!editMode) {
-      setEditData({
-        name: userData?.name || "",
-        email: userData?.email || ""
-      });
-    }
-    setScores(Array.isArray(scoreData) ? scoreData : []);
-    setCharities(Array.isArray(charityData) ? charityData : []);
-    setSelected(userCharity?.charity_id || "");
-    setPercentage(userCharity?.contribution_percentage || 10);
-    
-    
-
-  } catch (error) {
-    console.error("Dashboard error:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // ================= HANDLERS =================
 
-  // Handle score input
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -143,19 +106,16 @@ const Dashboard = () => {
     if (res) {
       setUser(res.user);
       setEditMode(false);
-      alert("Profile updated successfully");
-    } else {
-      alert("Update failed");
+      alert("Profile updated");
     }
   };
 
-
-  //Edit score
   const handleEditScore = (score) => {
     if (draw?.status === "completed") {
-      alert("Scores are locked after draw");
+      alert("Scores locked after draw");
       return;
     }
+
     setForm({
       score: score.score,
       date: score.date,
@@ -164,332 +124,242 @@ const Dashboard = () => {
     setEditingScore(score.id);
   };
 
-
-    // Activate subscription
-    const handleSubscribe = async (type) => {
-      try {
-        if (!type || loadingPlan) return;
-
-        const validType = String(type).toLowerCase().trim();
-
-        if (!["monthly", "yearly"].includes(validType)) {
-          alert("Invalid plan selected");
-          return;
-        }
-
-        setLoadingPlan(validType);
-
-        // 🔥 STEP 1: CREATE ORDER
-        const { order, amount, plan_type } = await createOrder({
-          plan_type: validType,
-        });
-
-        // 🔥 STEP 2: OPEN RAZORPAY
-        const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-          amount: order.amount,
-          currency: "INR",
-          name: "WinKind",
-          description: "Subscription Payment",
-          order_id: order.id,
-
-          handler: async function (response) {
-            await verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              plan_type,
-            });
-
-            alert("Payment successful 🎉");
-            fetchData();
-          },
-
-          theme: {
-            color: "#0a7f3f",
-          },
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-
-      } catch (error) {
-        console.error("Payment error:", error);
-
-        alert(
-          error?.response?.data?.message ||
-          error?.message ||
-          "Payment failed"
-        );
-
-      } finally {
-        setLoadingPlan(null);
-      }
-    };
-
-
   const handleDeleteScore = async (id) => {
-  try {
-    if (!id) {
-      alert("Invalid score id");
-      return;
-    }
-
     if (draw?.status === "completed") {
-      alert("Scores are locked after draw");
+      alert("Scores locked after draw");
       return;
     }
 
     await deleteScore(id);
     fetchData();
+  };
 
-  } catch (err) {
-    console.error("Delete error:", err);
-    alert("Failed to delete score");
-  }
-};
-
-
-  // Submit score
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (editingScore) {
-      await updateScore(editingScore, form);
-      setEditingScore(null);
-    } else{
-      await addScore(form);
+    const score = Number(form.score);
+
+    if (!score) return alert("Enter score");
+
+    if (score < 1 || score > 45) {
+      return alert("Score must be between 1-45");
     }
-      setForm({ score: "", date: "" });
-    fetchData(); // refresh data
+
+    const payload = { score, date: form.date };
+
+    if (editingScore) {
+      await updateScore(editingScore, payload);
+      setEditingScore(null);
+    } else {
+      await addScore(payload);
+    }
+
+    setForm({ score: "", date: "" });
+    fetchData();
   };
 
-  // Save charity selection
   const handleCharitySubmit = async () => {
-    if (!selected) return alert("Select a charity");
+    if (!selected) return alert("Select charity");
 
     await selectCharity({
       charity_id: selected,
-      contribution_percentage: percentage,
+      contribution_percentage: Number(percentage),
     });
 
-    alert("Charity saved successfully");
+    alert("Charity saved");
   };
 
+  const handleSubscribe = async (type) => {
+    try {
+      if (!type || loadingPlan) return;
 
+      setLoadingPlan(type);
 
-  // ================= LOADING =================
-  if (loading) {
-    return <div className="dashboard"><p>Loading dashboard...</p></div>;
-  }
+      const { order, plan_type } = await createOrder({
+        plan_type: type,
+      });
 
-  if (!subscription || subscription.status !== "active") {
-    return (
-      <div className="card">
-        <h2>🚫 Access Restricted</h2>
-        <p>Please subscribe to use this platform</p>
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: "INR",
+        name: "WinKind",
+        order_id: order.id,
 
-        <button 
-          disabled={loadingPlan === "monthly"}
-          onClick={() => handleSubscribe("monthly")}
-        >
-          Monthly Plan
-        </button>
+        handler: async function (response) {
+          await verifyPayment({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            plan_type,
+          });
 
-        <button
-          disabled={loadingPlan === "yearly"}
-          onClick={() => handleSubscribe("yearly")}>
-          Yearly Plan
-        </button>
-      </div>
-    );
-  }
+          alert("Payment successful 🎉");
+          fetchData();
+        },
+      };
 
-  // ================= UI =================
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch {
+      alert("Payment failed");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
+
   return (
-    <div className="dashboard">
-      <h2>Dashboard</h2>
-
-      {/* USER INFO */}
-      {user && (
+    <>
+      {!subscription || subscription.status !== "active" ? (
         <div className="card">
-          <h3>Profile</h3>
+          <h2>Subscribe to continue</h2>
 
-          {editMode ? (
-            <>
-              <input
-                name="name"
-                value={editData.name}
-                onChange={handleEditChange}
-              />
+          <div style={{ display: "flex", gap: "15px", marginTop: "15px" }}>
+            <button
+              className="btn primary"
+              onClick={() => handleSubscribe("monthly")}
+              disabled={loadingPlan === "monthly"}
+            >
+              {loadingPlan === "monthly" ? "Processing..." : "Monthly ₹100"}
+            </button>
 
-              <button onClick={handleSaveProfile}>Save</button>
-              <button onClick={() => setEditMode(false)}>Cancel</button>
-            </>
-          ) : (
-            <>
-              <p><strong>Name:</strong> {user.name}</p>
-              <p><strong>Email:</strong> {user.email}</p>
-              <p><strong>Role:</strong> {role}</p>
-
-              <button onClick={() => setEditMode(true)}>
-                Edit Profile
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* USER FEATURES ONLY */}
-      {role !== "admin" && (
-        <>
-          {/* SUBSCRIPTION */}
-          <div className="card">
-            <h3>Subscription</h3>
-
-            {subscription ? (
-              <>
-                <p>Status: {subscription.status}</p>
-                {subscription.status === "expired" && (
-                  <button onClick={() => handleSubscribe("monthly")}>
-                    Renew Subscription
-                  </button>
-                )}
-                <p>Plan: {subscription.plan_type}</p>
-                <p>Expiry: {subscription.expiry_date}</p>
-              </>
-            ) : (
-              <>
-                <p>No active subscription</p>
-
-                <button onClick={() => handleSubscribe("monthly")}>
-                  Monthly Plan
-                </button>
-
-                <button onClick={() => handleSubscribe("yearly")}>
-                  Yearly Plan
-                </button>
-              </>
-            )}
+            <button
+              className="btn primary"
+              onClick={() => handleSubscribe("yearly")}
+              disabled={loadingPlan === "yearly"}
+            >
+              {loadingPlan === "yearly" ? "Processing..." : "Yearly ₹1000"}
+            </button>
           </div>
+        </div>
+      ) : (
+        <div className="dashboard">
+          <h2>Dashboard</h2>
 
-          {/* ADD SCORE */}
+          {/* PROFILE */}
+          {user && (
+            <div className="card">
+              <h3>Profile</h3>
+
+              {editMode ? (
+                <>
+                  <div className="form-group">
+                    <input
+                      name="name"
+                      value={editData.name}
+                      onChange={handleEditChange}
+                    />
+                  </div>
+
+                  <button className="btn primary" onClick={handleSaveProfile}>
+                    Save
+                  </button>
+
+                  <button className="btn delete-btn" onClick={() => setEditMode(false)}>
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p>Name: {user.name}</p>
+                  <p>Email: {user.email}</p>
+
+                  <button className="btn edit-btn" onClick={() => setEditMode(true)}>
+                    Edit
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* SCORES */}
           <div className="card">
-            <h3>Add Score</h3>
+            <h3>Scores</h3>
 
             <form onSubmit={handleSubmit}>
-              <input
-                type="number"
-                name="score"
-                placeholder="Score (1-45)"
-                value={form.score}
-                onChange={handleChange}
-              />
+              <div className="form-group">
+                <input
+                  type="number"
+                  name="score"
+                  min="1"
+                  max="45"
+                  value={form.score}
+                  onChange={handleChange}
+                />
+              </div>
 
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-              />
+              <div className="form-group">
+                <input
+                  type="date"
+                  name="date"
+                  value={form.date}
+                  onChange={handleChange}
+                />
+              </div>
 
-              <button type="submit">
-                {editingScore ? "Update Score" : "Add Score"}
+              <button className="btn primary">
+                {editingScore ? "Update" : "Add"}
               </button>
             </form>
-          </div>
 
-          {/* SCORE LIST */}
-          <div className="card">
-            <h3>Your Scores</h3>
+            {scores.map((s) => (
+              <div key={s.id} className="score-row">
+                <div className="score-info">
+                  <span>{s.score}</span>
+                  <small>{new Date(s.date).toLocaleDateString()}</small>
+                </div>
 
-            {draw?.status === "completed" && (
-              <p style={{color: "red"}}>
-                Scores are locked after draw
-              </p>
-            )}
-
-            {scores.length === 0 ? (
-              <p>No scores yet</p>
-            ) : (
-              scores.map((s, i) => (
-                <div key={i} className="score-item">
-                  Score: {s.score} | Date: {s.date}
-
-                  {/* 🔥 EDIT BUTTON */}
-                  <button
-                    onClick={() => handleEditScore(s)}
-                  >
+                <div className="score-actions">
+                  <button className="btn edit-btn" onClick={() => handleEditScore(s)}>
                     Edit
                   </button>
 
-                  {/* 🔥 DELETE BUTTON */}
-                  <button
-                    onClick={() => handleDeleteScore(s.id)}
-                  >
+                  <button className="btn delete-btn" onClick={() => handleDeleteScore(s.id)}>
                     Delete
                   </button>
                 </div>
-              ))
-            )}
+              </div>
+            ))}
           </div>
 
           {/* CHARITY */}
           <div className="card">
-            <h3>Select Charity</h3>
+            <h3>Charity</h3>
 
-            <select
-              value={selected}
-              onChange={(e) => setSelected(e.target.value)}
-            >
-              <option value="">Choose Charity</option>
-              {charities.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <div className="form-group">
+              <select value={selected} onChange={(e) => setSelected(e.target.value)}>
+                <option value="">Select</option>
+                {charities.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <input
-              type="number"
-              value={percentage}
-              min="10"
-              onChange={(e) => setPercentage(e.target.value)}
-            />
+            <div className="form-group">
+              <input
+                type="number"
+                value={percentage}
+                min="10"
+                onChange={(e) => setPercentage(Number(e.target.value))}
+              />
+            </div>
 
-            <button onClick={handleCharitySubmit}>
-              Save Charity
+            <button className="btn primary" onClick={handleCharitySubmit}>
+              Save
             </button>
           </div>
-        </>
-      )}
 
-      {/* DRAW RESULTS */}
-      <DrawResult draw={draw} winners={winners} role={role} />
-
-      {/* WINNINGS */}
-      <Winnings winners={winners} />
-
-      {/* WINNERS (ADMIN ONLY) */}
-      {role === "admin" && (
-        <div className="card">
-          <h3>Winners</h3>
-
-          {winners.length === 0 ? (
-            <p>No winners yet</p>
-          ) : (
-            winners.map((w, i) => (
-              <div key={i}>
-                Match: {w.match_count} |
-                Prize: ₹{w.prize_amount} |
-                Status: {w.status}
-              </div>
-            ))
-          )}
+          <DrawResult draw={draw} />
+          <Winnings />
         </div>
       )}
-    </div>
+    </>
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

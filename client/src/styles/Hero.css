@@ -1,21 +1,61 @@
 /* ================= HERO ================= */
 
 .hero {
-  min-height: 85vh;
+  min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
 
-  /* 🔥 Premium gradient background */
+  /* 🔥 Gradient */
   background: linear-gradient(135deg, #0a7f3f, #22c55e);
+
+  /* ✨ Depth overlay */
+  position: relative;
+  overflow: hidden;
 
   padding: 20px;
 }
 
-/* Content wrapper */
+/* subtle glowing background effect */
+.hero::before {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+
+  top: -100px;
+  left: -100px;
+
+  filter: blur(80px);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+
+  bottom: -100px;
+  right: -100px;
+
+  filter: blur(80px);
+}
+
+/* ================= CONTENT ================= */
+
 .hero-content {
   max-width: 700px;
+  position: relative;
+  z-index: 2;
+
+  animation: fadeUp 0.8s ease forwards;
 }
 
 /* ================= HEADING ================= */
@@ -43,11 +83,11 @@
   padding: 14px 35px;
   background: white;
   color: #0a7f3f;
+
   border-radius: 10px;
   font-weight: 600;
   font-size: 16px;
 
-  border: none;
   cursor: pointer;
 
   transition: all 0.3s ease;
@@ -55,8 +95,22 @@
 
 /* Hover */
 .hero .cta-btn:hover {
-  background: #f1f1f1;
-  transform: scale(1.05);
+  background: #f5f5f5;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ================= RESPONSIVE ================= */
@@ -64,7 +118,7 @@
 /* Tablet */
 @media (max-width: 768px) {
   .hero {
-    min-height: 70vh;
+    min-height: 75vh;
   }
 
   .hero h1 {
@@ -79,7 +133,7 @@
 /* Mobile */
 @media (max-width: 480px) {
   .hero {
-    min-height: 60vh;
+    min-height: 65vh;
     padding: 10px;
   }
 

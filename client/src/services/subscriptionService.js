@@ -1,125 +1,148 @@
+const BASE = import.meta.env.VITE_API_URL + "/api";
+const API = BASE + "/subscription";
+
 /*
-  Subscription Service
-  --------------------
-  Handles:
-  - Creating a subscription (monthly/yearly)
-  - Fetching current user subscription
-
-  NOTE:
-  - Controls access to core features (scores, draw participation)
+  Create Order (Razorpay)
 */
-
-const API = import.meta.env.VITE_API_URL + "/subscription";
-
-export const createSubscription = async (payload) => {
+export const createOrder = async (data) => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API}/create`, {
+    const res = await fetch(`${API}/create-order`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload), // ✅ FIX HERE
+      body: JSON.stringify(data),
     });
 
-    const result = await res.json();
-
-    if (!res.ok) {
-      throw new Error(result.message || "Subscription failed");
-    }
-
-    return result;
+    return await res.json();
 
   } catch (error) {
-    console.error("createSubscription error:", error);
+    console.error("createOrder error:", error);
     throw error;
   }
 };
 
 /*
-  Get subscription details
-  - Returns current subscription info
-  - Used in dashboard
+  Verify Payment
+*/
+export const verifyPayment = async (data) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${API}/verify-payment`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    return await res.json();
+
+  } catch (error) {
+    console.error("verifyPayment error:", error);
+    throw error;
+  }
+};
+
+/*
+  Get Current Subscription
 */
 export const getSubscription = async () => {
   try {
     const token = localStorage.getItem("token");
 
     const res = await fetch(`${API}/my`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: token
+        ? { Authorization: `Bearer ${token}` }
+        : {},
     });
 
-    if (!res.ok) {
-      console.warn("No subscription found");
-      return null; // user has no subscription
-    }
+    if (!res.ok) return null;
 
     return await res.json();
+
   } catch (error) {
     console.error("getSubscription error:", error);
     return null;
   }
 };
 
-export const getAllSubscriptions = async () => {
-  const token = localStorage.getItem("token");
+/*
+  Cancel Subscription
+*/
+export const cancelSubscription = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-  const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/subscription/all`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
+    const res = await fetch(`${API}`, {   
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  return res.json();
+    return await res.json();
+
+  } catch (error) {
+    console.error("cancelSubscription error:", error);
+    throw error;
+  }
 };
 
-export const updateSubscriptionStatus = async (data) => {
-  const token = localStorage.getItem("token");
+/*
+  Admin: Get All Subscriptions
+*/
+export const getAllSubscriptions = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-  await fetch(
-    `${import.meta.env.VITE_API_URL}/subscription/status`,
-    {
+    const res = await fetch(`${API}/all`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return await res.json();
+
+  } catch (error) {
+    console.error("getAllSubscriptions error:", error);
+    throw error;
+  }
+};
+
+/*
+  Admin: Update Subscription Status
+*/
+export const updateSubscriptionStatus = async (id, status) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token found");
+    }
+
+    const res = await fetch(`${API}/${id}`, {   
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ status }),         
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || "Failed to update");
     }
-  );
-};
 
-export const createOrder = async (data) => {
-  const token = localStorage.getItem("token");
+    return await res.json();
 
-  const res = await fetch(`${API}/create-order`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
-
-  return await res.json();
-};
-
-export const verifyPayment = async (data) => {
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(`${API}/verify-payment`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
-
-  return await res.json();
+  } catch (error) {
+    console.error("updateSubscriptionStatus error:", error);
+    throw error;
+  }
 };

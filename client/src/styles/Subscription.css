@@ -1,123 +1,172 @@
 /* ================= SUBSCRIPTION ================= */
 
 .sub-section {
-text-align: center;
+  text-align: center;
 }
 
 /* Heading */
 .sub-section h2 {
-margin-bottom: 40px;
+  margin-bottom: 50px;
 }
 
 /* ================= CONTAINER ================= */
 
 .pricing-container {
-display: flex;
-justify-content: center;
-gap: 25px;
-flex-wrap: wrap;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
 }
 
 /* ================= CARD ================= */
 
 .pricing-card {
-background: white;
-padding: 30px;
-width: 300px;
-border-radius: 16px;
-box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-position: relative;
-transition: 0.3s;
+  background: white;
+  padding: 32px;
+  width: 300px;
+
+  border-radius: 18px;
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+
+  position: relative;
+  transition: all 0.3s ease;
+
+  overflow: hidden;
 }
 
+/* subtle top highlight */
+.pricing-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 4px;
+
+  background: linear-gradient(90deg, #0a7f3f, #22c55e);
+
+  opacity: 0;
+  transition: 0.3s;
+}
+
+/* Hover */
 .pricing-card:hover {
-transform: translateY(-6px);
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
 }
 
-/* FEATURED CARD */
+.pricing-card:hover::before {
+  opacity: 1;
+}
+
+/* ================= FEATURED CARD ================= */
+
 .featured {
-border: 2px solid #0a7f3f;
+  border: 2px solid var(--primary);
+  transform: scale(1.05);
+  box-shadow: 0 20px 45px rgba(10, 127, 63, 0.25);
 }
 
-/* BADGE */
+.featured:hover {
+  transform: scale(1.08) translateY(-10px);
+}
+
+/* ================= BADGE ================= */
+
 .badge {
-position: absolute;
-top: -10px;
-right: 15px;
-background: #0a7f3f;
-color: white;
-font-size: 12px;
-padding: 5px 10px;
-border-radius: 20px;
+  position: absolute;
+  top: -12px;
+  right: 15px;
+
+  background: var(--primary);
+  color: white;
+
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 20px;
+
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Title */
+/* ================= TITLE ================= */
+
 .pricing-card h3 {
-color: #0a7f3f;
-margin-bottom: 15px;
+  color: var(--primary);
+  margin-bottom: 15px;
 }
 
-/* Price */
+/* ================= PRICE ================= */
+
 .price {
-font-size: 32px;
-font-weight: bold;
-margin-bottom: 20px;
+  font-size: 34px;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 .price span {
-font-size: 14px;
-color: #666;
+  font-size: 14px;
+  color: var(--text-light);
 }
 
-/* List */
+/* ================= LIST ================= */
+
 .pricing-card ul {
-list-style: none;
-padding: 0;
-margin-bottom: 20px;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 25px;
 }
 
 .pricing-card li {
-margin: 8px 12px;
-color: #444;
+  margin: 10px 0;
+  color: #444;
 }
 
-/* Button */
+/* ================= BUTTON ================= */
+
 .subscribe-btn {
-width: 100%;
-padding: 12px;
-background: #0a7f3f;
-color: white;
-border-radius: 10px;
-font-weight: 600;
-transition: 0.3s;
+  width: 100%;
+  padding: 14px;
+
+  background: var(--primary);
+  color: white;
+
+  border-radius: 10px;
+  font-weight: 600;
+
+  transition: all 0.3s ease;
 }
 
+/* Hover */
 .subscribe-btn:hover {
-background: #1db954;
+  background: var(--primary-light);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* ================= RESPONSIVE ================= */
 
 /* Tablet */
 @media (max-width: 768px) {
-.pricing-card {
-width: 260px;
-}
+  .pricing-card {
+    width: 260px;
+  }
 }
 
 /* Mobile */
 @media (max-width: 480px) {
-.pricing-container {
-flex-direction: column;
-align-items: center;
-}
+  .pricing-container {
+    flex-direction: column;
+    align-items: center;
+  }
 
-.pricing-card {
-width: 100%;
-max-width: 320px;
-}
+  .pricing-card {
+    width: 100%;
+    max-width: 320px;
+  }
 
-.price {
-font-size: 26px;
-}
+  .price {
+    font-size: 26px;
+  }
 }

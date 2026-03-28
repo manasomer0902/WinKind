@@ -1,28 +1,22 @@
-import { useEffect, useState } from "react";
-import { getLatestDraw } from "../services/drawService";
+const DrawResult = ({ draw }) => {
 
-const DrawResult = () => {
-  const [draw, setDraw] = useState(null);
-
-  useEffect(() => {
-    const fetchDraw = async () => {
-      const data = await getLatestDraw();
-      setDraw(data);
-    };
-
-    fetchDraw();
-  }, []);
-
-  if (!draw) return null;
+  if (!draw) {
+    return (
+      <div className="card">
+        <h3>🎯 Latest Draw Result</h3>
+        <p>No draw available yet</p>
+      </div>
+    );
+  }
 
   return (
     <div className="card">
       <h3>🎯 Latest Draw Result</h3>
 
       <div style={{ marginTop: "10px" }}>
-        {draw.numbers?.map((num, i) => (
+        {draw.numbers?.map((num) => (
           <span
-            key={i}
+            key={num}
             style={{
               marginRight: "10px",
               padding: "8px 12px",

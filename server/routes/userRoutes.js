@@ -9,9 +9,11 @@ import { protect } from "../middleware/authMiddleware.js";
 /*
   User Routes
   -----------
+  Base: /api/user
+
   Handles:
-  - Fetching logged-in user profile
-  - Updating user profile
+  - Fetch logged-in user profile
+  - Update profile
 
   All routes require authentication
 */
@@ -20,10 +22,12 @@ const router = express.Router();
 
 // ================= PROFILE =================
 
-// Get profile
-router.get("/profile", protect, getProfile);
+// Modern route (recommended)
+router.get("/me", protect, getProfile);
+router.put("/me", protect, updateProfile);
 
-// Update profile
+// Optional: backward compatibility
+router.get("/profile", protect, getProfile);
 router.put("/profile", protect, updateProfile);
 
 export default router;

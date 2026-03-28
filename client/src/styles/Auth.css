@@ -1,72 +1,173 @@
-/* Container */
+/* ================= AUTH CONTAINER ================= */
+
 .auth-container {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+
   background: linear-gradient(135deg, #0a7f3f, #1db954);
+
+  position: relative;
+  overflow: hidden;
 }
 
-/* Box */
+/* ✨ background glow */
+.auth-container::before {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+
+  top: -100px;
+  left: -100px;
+
+  filter: blur(80px);
+}
+
+/* ================= AUTH BOX ================= */
+
 .auth-box {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
+
   padding: 40px;
   width: 360px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+  border-radius: 16px;
+
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+
+  backdrop-filter: blur(10px);
+
+  position: relative;
+  z-index: 2;
+
+  animation: fadeUp 0.6s ease;
 }
 
-/* Heading */
+/* ================= HEADING ================= */
+
 .auth-box h2 {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   text-align: center;
-  color: #0a7f3f;
+  color: var(--primary);
 }
 
-/* Inputs */
+/* ================= INPUT ================= */
+
 .auth-box input {
   width: 100%;
   padding: 12px;
+
   margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+
+  border: 1px solid #ddd;
+  border-radius: 8px;
+
   outline: none;
-  transition: border 0.3s ease;
-}
 
-/* Input focus */
-.auth-box input:focus {
-  border-color: #0a7f3f;
-}
-
-/* Button */
-.auth-box button {
-  width: 100%;
-  padding: 12px;
-  background: #0a7f3f;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-/* Button hover */
-.auth-box button:hover {
-  background: #086b35;
-  transform: scale(1.02);
+/* focus */
+.auth-box input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(10, 127, 63, 0.15);
 }
 
-/* Bottom text */
+/* ================= BUTTON ================= */
+
+.auth-box button {
+  width: 100%;
+  padding: 13px;
+
+  background: var(--primary);
+  color: white;
+
+  border-radius: 10px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+/* hover */
+.auth-box button:hover {
+  background: var(--primary-light);
+  transform: translateY(-2px) scale(1.02);
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ================= TEXT ================= */
+
 .auth-box p {
-  margin-top: 15px;
+  margin-top: 18px;
   text-align: center;
   cursor: pointer;
-  color: #555;
+
+  color: var(--text-light);
+
+  transition: 0.3s;
 }
 
-/* Hover effect on text */
 .auth-box p:hover {
-  color: #0a7f3f;
+  color: var(--primary);
+}
+
+.success {
+  color:green;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.error {
+  color:red;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.password-field {
+  position: relative;
+  width: 100%;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 30%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 480px) {
+  .auth-box {
+    width: 90%;
+    padding: 30px;
+  }
 }

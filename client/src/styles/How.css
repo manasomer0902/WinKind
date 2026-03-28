@@ -1,73 +1,111 @@
 /* ================= HOW ================= */
 
 .how {
-text-align: center;
+  text-align: center;
 }
 
 /* Heading */
 .how h2 {
-margin-bottom: 50px;
+  margin-bottom: 60px;
 }
 
 /* ================= STEPS ================= */
 
 .steps {
-display: flex;
-justify-content: center;
-align-items: center;
-gap: 15px;
-flex-wrap: wrap;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  flex-wrap: wrap;
 }
 
 /* ================= STEP CARD ================= */
 
 .step {
-background: white;
-padding: 25px;
-width: 220px;
-border-radius: 14px;
-box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-transition: 0.3s;
+  background: white;
+  padding: 28px;
+  width: 230px;
+
+  border-radius: 16px;
+
+  /* upgraded shadow */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+  transition: all 0.3s ease;
+
+  position: relative;
+  overflow: hidden;
 }
 
+/* top gradient highlight */
+.step::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 4px;
+
+  background: linear-gradient(90deg, #0a7f3f, #22c55e);
+
+  opacity: 0;
+  transition: 0.3s;
+}
+
+/* Hover */
 .step:hover {
-transform: translateY(-6px);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
 }
 
-/* ICON */
+.step:hover::before {
+  opacity: 1;
+}
+
+/* ================= ICON ================= */
+
 .icon {
-font-size: 28px;
-margin-bottom: 10px;
+  font-size: 32px;
+  margin-bottom: 12px;
 }
 
-/* TITLE */
+/* ================= TITLE ================= */
+
 .step h4 {
-color: #0a7f3f;
-margin-bottom: 10px;
+  color: var(--primary);
+  margin-bottom: 10px;
+  font-size: 16px;
 }
 
-/* TEXT */
+/* ================= TEXT ================= */
+
 .step p {
-font-size: 14px;
-color: #555;
+  font-size: 14px;
+  color: var(--text-light);
+  line-height: 1.5;
 }
 
-/* ================= ARROW ================= */
+/* ================= OPTIONAL CONNECTOR (ADVANCED) ================= */
 
-
+/* if you ever want arrows between steps */
+.arrow {
+  font-size: 24px;
+  color: var(--primary);
+}
 
 /* ================= RESPONSIVE ================= */
 
 /* Tablet */
 @media (max-width: 900px) {
-.arrow {
-display: none;
-}
+  .arrow {
+    display: none;
+  }
 }
 
 /* Mobile */
 @media (max-width: 500px) {
-.step {
-width: 100%;
-}
+  .step {
+    width: 100%;
+  }
 }

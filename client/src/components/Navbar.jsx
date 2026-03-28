@@ -1,47 +1,43 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "../styles/Navbar.css";
-
-/*
-  Navbar Component
-  ----------------
-  Handles:
-  - Navigation across app
-  - Auth-based UI (logged in / not logged in)
-  - Role-based navigation (user vs admin)
-  - Logout functionality
-
-  Acts as the main control for user flow
-*/
 
 const Navbar = () => {
   const navigate = useNavigate();
 
-  // Auth data
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [role, setRole] = useState(localStorage.getItem("role"));
 
-  // Logout handler
+  // 🔄 Sync with localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setToken(localStorage.getItem("token"));
+      setRole(localStorage.getItem("role"));
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    // Also run once (for same tab updates)
+    handleStorageChange();
+
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-
-    navigate("/");
+    localStorage.clear();
+    window.dispatchEvent(new Event("storage"));
+    navigate("/login");
   };
 
   return (
     <nav className="navbar">
 
-      {/* Brand Logo */}
+      {/* LOGO */}
       <h2
         className="logo"
         onClick={() => {
-          // 🔥 Smart navigation based on login + role
           if (token) {
-            if (role === "admin") {
-              navigate("/admin");
-            } else {
-              navigate("/dashboard");
-            }
+            navigate(role === "admin" ? "/admin" : "/dashboard");
           } else {
             navigate("/");
           }
@@ -54,55 +50,51 @@ const Navbar = () => {
 
         {token ? (
           <>
-            {/* 🟢 HOME BUTTON */}
-            <span
+            <button
               className="nav-item"
               onClick={() => navigate("/")}
             >
               Home
-            </span>
-            {/* Role-based navigation */}
+            </button>
+
             {role === "admin" ? (
-              <span
+              <button
                 className="nav-item"
                 onClick={() => navigate("/admin")}
               >
                 Admin Panel
-              </span>
+              </button>
             ) : (
-              <span
+              <button
                 className="nav-item"
                 onClick={() => navigate("/dashboard")}
               >
                 Dashboard
-              </span>
+              </button>
             )}
 
-            {/* Logout */}
-            <span
+            <button
               className="nav-item logout"
               onClick={handleLogout}
             >
               Logout
-            </span>
+            </button>
           </>
         ) : (
           <>
-            {/* Login */}
-            <span
+            <button
               className="nav-item"
               onClick={() => navigate("/login")}
             >
               Login
-            </span>
+            </button>
 
-            {/* Signup / Subscribe */}
-            <span
+            <button
               className="btn"
               onClick={() => navigate("/signup")}
             >
               Get Started
-            </span>
+            </button>
           </>
         )}
 

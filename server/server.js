@@ -2,6 +2,9 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "path";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import morgan from "morgan";
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -29,7 +32,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
       callback(null, true);
     } else {
       callback(new Error("CORS not allowed"));
@@ -42,7 +45,7 @@ app.use(cors({
 app.use(express.json());
 
 // Serve uploaded files
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 /*
   ================= ROUTES =================
@@ -55,6 +58,16 @@ app.use("/api/draw", drawRoutes);
 app.use("/api/winner", winnerRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
+
+app.use(helmet());
+
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+}));
+
+app.use(morgan("dev"));
+
 
 /*
   ================= TEST ROUTES =================
@@ -85,8 +98,8 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error("Global Error:", err.message);
 
-  res.status(500).json({
-    message: "Server error",
+  res.status(err.status || 500).json({
+    message: err.message || "Server error",
   });
 });
 

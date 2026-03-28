@@ -1,53 +1,38 @@
-/*
-  Charity Service
-  ---------------
-  Handles:
-  - Fetching all charities
-  - Selecting a charity for user
-
-  This feature connects gameplay with social impact (PRD core idea)
-*/
-
-const API = import.meta.env.VITE_API_URL + "/charity";
+const BASE = import.meta.env.VITE_API_URL + "/api";
+const API = BASE + "/charity";
 
 /*
   Get all charities
-  - Public endpoint
-  - Used in dashboard dropdown
 */
 export const getCharities = async () => {
   try {
-    const res = await fetch(`${API}`);
+    const res = await fetch(`${API}`);  
 
     if (!res.ok) {
       throw new Error("Failed to fetch charities");
     }
 
     const data = await res.json();
-
-    // Ensure safe array
     return Array.isArray(data) ? data : [];
 
   } catch (error) {
     console.error("getCharities error:", error);
-    return []; // prevent UI crash
+    return [];
   }
 };
 
 /*
   Select charity
-  - Saves user's preferred charity + contribution %
-  - Requires authentication
 */
 export const selectCharity = async (data) => {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API}/select`, {
+    const res = await fetch(`${API}/select`, {   
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,        
       },
       body: JSON.stringify(data),
     });
@@ -66,36 +51,69 @@ export const selectCharity = async (data) => {
   }
 };
 
-export const addCharity = async (data) => {
-  const token = localStorage.getItem("token");
+/*
+  Get user's selected charity
+*/
+export const getUserCharity = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-  const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/charity/add`,
-    {
+    const res = await fetch(`${API}/my`, {   
+      headers: token
+        ? { Authorization: `Bearer ${token}` }
+        : {},
+    });
+
+    return await res.json();
+
+  } catch (error) {
+    console.error("getUserCharity error:", error);
+    return null;
+  }
+};
+
+/*
+  Admin: Add charity
+*/
+export const addCharity = async (data) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${API}/add`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
-    }
-  );
+    });
 
-  return res.json();
+    return await res.json();
+
+  } catch (error) {
+    console.error("addCharity error:", error);
+    throw error;
+  }
 };
 
+/*
+  Admin: Delete charity
+*/
 export const deleteCharity = async (id) => {
-  const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-  const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/charity/${id}`,
-    {
+    const res = await fetch(`${API}/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
-  );
+    });
 
-  return res.json();
+    return await res.json();
+
+  } catch (error) {
+    console.error("deleteCharity error:", error);
+    throw error;
+  }
 };

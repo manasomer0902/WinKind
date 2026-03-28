@@ -1,9 +1,9 @@
 /*
-  Draw Logic Utility
-  ------------------
-  Handles:
-  - Generating unique draw numbers
-  - Counting matches between user scores and draw numbers
+  Draw Logic Utility (Production Ready)
+  ------------------------------------
+  - Unique draw numbers
+  - Safe match counting
+  - Input validation
 */
 
 // ================= GENERATE DRAW =================
@@ -15,18 +15,29 @@ export const generateDrawNumbers = () => {
     numbers.add(num);
   }
 
-  // 🟢 Sort numbers for consistency (UI friendly)
   return Array.from(numbers).sort((a, b) => a - b);
 };
 
 // ================= COUNT MATCHES =================
 export const countMatches = (userScores, drawNumbers) => {
-  let count = 0;
+  // ❌ Safety checks
+  if (!Array.isArray(userScores) || !Array.isArray(drawNumbers)) {
+    throw new Error("Invalid input: scores must be arrays");
+  }
 
-  // 🟢 Convert draw numbers to Set (faster lookup)
+  // ✅ Enforce max 5 scores
+  const validUserScores = userScores
+    .filter(score => Number.isInteger(score) && score >= 1 && score <= 45)
+    .slice(0, 5);
+
+  // ✅ Remove duplicates from user scores
+  const userSet = new Set(validUserScores);
+
   const drawSet = new Set(drawNumbers);
 
-  userScores.forEach(score => {
+  let count = 0;
+
+  userSet.forEach(score => {
     if (drawSet.has(score)) {
       count++;
     }

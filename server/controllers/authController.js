@@ -2,23 +2,44 @@ import pool from "../config/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+import { sendEmail } from "../utils/emailService.js";
+import { welcomeEmail } from "../utils/emailTemplates.js";
+
 /*
-  Auth Controller
-  ---------------
-  Handles:
-  - User registration
-  - User login (JWT generation)
+  Auth Controller (Production Ready)
 */
+
+// ❌ Safety check
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is missing ❌");
+}
 
 // ================= REGISTER =================
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
 
     // 🔴 Validation
-    if (!name || !email || !password) {
+    if (!name | !email || !password) {   
       return res.status(400).json({
         message: "All fields are required",
+      });
+    }
+
+    // ✅ Normalize email
+    email = email.toLowerCase();
+
+    // ✅ Basic email validation
+    if (!email.includes("@")) {
+      return res.status(400).json({
+        message: "Invalid email format",
+      });
+    }
+
+    // ✅ Password length check
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
       });
     }
 
@@ -37,11 +58,24 @@ export const registerUser = async (req, res) => {
     // 🟡 Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🟢 Insert user (NO password return)
+    // 🟢 Insert user
     const newUser = await pool.query(
-      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, role",
+      `INSERT INTO users (name, email, password) 
+       VALUES ($1, $2, $3) 
+       RETURNING id, name, email, role`,
       [name, email, hashedPassword]
     );
+
+    // 📩 Send welcome email (NON-BLOCKING ✅)
+    const emailData = welcomeEmail(name);
+
+    sendEmail({
+      to: email,
+      subject: emailData.subject,
+      html: emailData.html,
+    }).catch((err) => {
+      console.error("Email failed:", err.message);
+    });
 
     res.status(201).json({
       message: "User registered successfully",
@@ -60,16 +94,16 @@ export const registerUser = async (req, res) => {
 // ================= LOGIN =================
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
-    // 🔴 Validation
     if (!email || !password) {
       return res.status(400).json({
         message: "Email and password are required",
       });
     }
 
-    // 🔴 Find user
+    email = email.toLowerCase();
+
     const userResult = await pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
@@ -83,7 +117,6 @@ export const loginUser = async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // 🔴 Check password
     const validPassword = await bcrypt.compare(
       password,
       user.password
@@ -95,14 +128,12 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    // 🟢 Generate token
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // 🟢 Return safe user object (NO password)
     res.json({
       token,
       user: {
