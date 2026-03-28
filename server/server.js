@@ -32,7 +32,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("CORS not allowed"));
@@ -43,6 +43,17 @@ app.use(cors({
 
 
 app.use(express.json());
+
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
+
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+}));
+
+app.use(morgan("dev"));
 
 // Serve uploaded files
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
@@ -59,14 +70,6 @@ app.use("/api/winner", winnerRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 
-app.use(helmet());
-
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
-}));
-
-app.use(morgan("dev"));
 
 
 /*
